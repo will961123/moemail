@@ -1,7 +1,7 @@
 import { NotFoundError } from "cloudflare";
 import "dotenv/config";
 import { execSync } from "node:child_process";
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, unlinkSync  } from "node:fs";
 import { resolve } from "node:path";
 import {
   createDatabase,
@@ -343,7 +343,8 @@ const pushPagesSecret = () => {
 
     // 清理临时文件
     if (existsSync(runtimeEnvFile)) {
-      execSync(`rm ${runtimeEnvFile}`, { stdio: "inherit" });
+      // execSync(`rm ${runtimeEnvFile}`, { stdio: "inherit" });
+      unlinkSync(runtimeEnvFile);
     }
 
     console.log("✅ Secrets pushed successfully");
@@ -354,7 +355,8 @@ const pushPagesSecret = () => {
     const runtimeEnvFile = resolve('.env.runtime.json');
     if (existsSync(runtimeEnvFile)) {
       try {
-        execSync(`rm ${runtimeEnvFile}`, { stdio: "inherit" });
+        // execSync(`rm ${runtimeEnvFile}`, { stdio: "inherit" });
+        unlinkSync(runtimeEnvFile);
       } catch (cleanupError) {
         console.error("⚠️ Failed to cleanup temporary file:", cleanupError);
       }
