@@ -5,15 +5,15 @@ import { useTranslations, useLocale } from "next-intl"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { signOut } from "next-auth/react"
-import { Github, Settings, Crown, Sword, User2, Gem, Mail, Zap, Key } from "lucide-react"
+import { Github, Settings, Crown, Sword, User2, Gem, Mail, Zap, Key, Users } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { WebhookConfig } from "./webhook-config"
-import { PromotePanel } from "./promote-panel"
 import { EmailServiceConfig } from "./email-service-config"
 import { useRolePermission } from "@/hooks/use-role-permission"
 import { PERMISSIONS } from "@/lib/permissions"
 import { WebsiteConfigPanel } from "./website-config-panel"
 import { ApiKeyPanel } from "./api-key-panel"
+import { UserManagementPanel } from "./user-management-panel"
 import { CollapsibleCard } from "@/components/ui/collapsible-card"
 
 interface ProfileCardProps {
@@ -65,15 +65,16 @@ export function ProfileCard({ user }: ProfileCardProps) {
   const tWebhook = useTranslations("profile.webhook")
   const tWebsite = useTranslations("profile.website")
   const tEmailService = useTranslations("profile.emailService")
-  const tPromote = useTranslations("profile.promote")
   const tApiKey = useTranslations("profile.apiKey")
+  const tUserManagement = useTranslations("profile.userManagement")
   const tNav = useTranslations("common.nav")
   const locale = useLocale()
   const router = useRouter()
   const { checkPermission } = useRolePermission()
   const canManageWebhook = checkPermission(PERMISSIONS.MANAGE_WEBHOOK)
-  const canPromote = checkPermission(PERMISSIONS.PROMOTE_USER)
   const canManageConfig = checkPermission(PERMISSIONS.MANAGE_CONFIG)
+  const canManageApiKey = checkPermission(PERMISSIONS.MANAGE_API_KEY)
+  const canManageUsers = checkPermission(PERMISSIONS.MANAGE_USER)
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -158,13 +159,13 @@ export function ProfileCard({ user }: ProfileCardProps) {
         </CollapsibleCard>
       )}
 
-      {canPromote && (
-        <CollapsibleCard title={tPromote("title")} icon={Gem} defaultOpen={false}>
-          <PromotePanel />
+      {canManageUsers && (
+        <CollapsibleCard title={tUserManagement("title")} icon={Users} defaultOpen={false}>
+          <UserManagementPanel />
         </CollapsibleCard>
       )}
 
-      {canManageWebhook && (
+      {canManageApiKey && (
         <CollapsibleCard title={tApiKey("title")} icon={Key} defaultOpen={false}>
           <ApiKeyPanel />
         </CollapsibleCard>

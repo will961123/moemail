@@ -7,9 +7,9 @@ interface Env {
   DB: D1Database
 }
 
-const MAX_EMAIL_COUNT = 10
+const MAX_EMAIL_COUNT = 3
 const MAX_MESSAGE_COUNT = 100
-const BATCH_SIZE = 10 // SQLite 变量限制
+const BATCH_SIZE = 3 // SQLite 变量限制
 
 async function getUserId(db: ReturnType<typeof drizzle>, identifier: string): Promise<string | null> {
   let user = await db
@@ -90,7 +90,7 @@ async function generateTestData(env: Env, userIdentifier: string) {
         await db.insert(messages).values(batch)
         console.log(`Created batch of ${batch.length} messages (received + sent) for email ${email.address}`)
       }
-      
+
       console.log(`Email ${email.address}: ${receivedMessages.length} received, ${sentMessages.length} sent messages`)
     }
 
@@ -106,7 +106,7 @@ export default {
     if (request.method === 'GET') {
       const url = new URL(request.url)
       const userIdentifier = url.searchParams.get('user')
-      
+
       if (!userIdentifier) {
         return new Response('Missing user parameter', { status: 400 })
       }
@@ -116,4 +116,4 @@ export default {
     }
     return new Response('Method not allowed', { status: 405 })
   }
-} 
+}
