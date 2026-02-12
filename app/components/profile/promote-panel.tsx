@@ -107,8 +107,6 @@ export function PromotePanel() {
     }
   }
 
-  const Icon = roleIcons[targetRole]
-
   return (
     <div className="space-y-4">
         <div className="flex gap-4">

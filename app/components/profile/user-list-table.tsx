@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Loader2, ChevronLeft, ChevronRight, Trash2, Search, X, Gem, Sword, User2, Crown, Eye } from "lucide-react"
 import { ROLES, Role } from "@/lib/permissions"
-import { cn } from "@/lib/utils"
 import {
   Table,
   TableBody,

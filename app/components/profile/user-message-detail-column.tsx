@@ -37,7 +37,6 @@ export function UserMessageDetailColumn({
   showBackButton = false,
   onBack,
 }: UserMessageDetailColumnProps) {
-  const t = useTranslations("profile.userManagement")
   const tMessageView = useTranslations("emails.messageView")
   const tLayout = useTranslations("emails.layout")
   const { theme } = useTheme()

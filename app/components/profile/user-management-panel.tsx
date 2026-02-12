@@ -78,10 +78,6 @@ type RoleWithoutEmperor = Exclude<Role, typeof ROLES.EMPEROR>
 export function UserManagementPanel() {
   const t = useTranslations("profile.userManagement")
   const tCard = useTranslations("profile.card")
-  const tMessages = useTranslations("emails.messages")
-  const tMessageView = useTranslations("emails.messageView")
-  const tLayout = useTranslations("emails.layout")
-  const tList = useTranslations("emails.list")
   const { toast } = useToast()
   const initialized = useRef(false)
 
@@ -176,25 +172,6 @@ export function UserManagementPanel() {
     }
   }, [])
 
-  const handleNextPage = () => {
-    const nextPage = currentPage + 1
-    setCurrentPage(nextPage)
-    fetchUsers(nextPage)
-  }
-
-  const handlePrevPage = () => {
-    const prevPage = currentPage - 1
-    setCurrentPage(prevPage)
-    fetchUsers(prevPage)
-  }
-
-  const handlePageSizeChange = (value: string) => {
-    const newSize = parseInt(value, 10)
-    setPageSize(newSize)
-    setCurrentPage(1)
-    fetchUsers(1, newSize)
-  }
-
   const handleSearch = () => {
     setCurrentPage(1)
     fetchUsers(1)
@@ -262,25 +239,6 @@ export function UserManagementPanel() {
     if (selectedUser) {
       await fetchMessages(selectedUser.id, email.id, 1, messagesPageSize)
     }
-  }
-
-  const handleEmailsNextPage = () => {
-    if (!selectedUser) return
-    const nextPage = emailsPage + 1
-    fetchUserEmails(selectedUser.id, nextPage, emailsPageSize)
-  }
-
-  const handleEmailsPrevPage = () => {
-    if (!selectedUser) return
-    const prevPage = emailsPage - 1
-    fetchUserEmails(selectedUser.id, prevPage, emailsPageSize)
-  }
-
-  const handleEmailsPageSizeChange = (value: string) => {
-    if (!selectedUser) return
-    const newSize = parseInt(value, 10)
-    setEmailsPageSize(newSize)
-    fetchUserEmails(selectedUser.id, 1, newSize)
   }
 
   const handleRefreshEmails = async () => {
@@ -415,25 +373,6 @@ export function UserManagementPanel() {
     if (selectedUser && selectedEmail) {
       await fetchMessageDetail(selectedUser.id, selectedEmail.id, messageId)
     }
-  }
-
-  const handleMessagesNextPage = () => {
-    if (!selectedEmail || !selectedUser) return
-    const nextPage = messagesPage + 1
-    fetchMessages(selectedUser.id, selectedEmail.id, nextPage, messagesPageSize)
-  }
-
-  const handleMessagesPrevPage = () => {
-    if (!selectedEmail || !selectedUser) return
-    const prevPage = messagesPage - 1
-    fetchMessages(selectedUser.id, selectedEmail.id, prevPage, messagesPageSize)
-  }
-
-  const handleMessagesPageSizeChange = (value: string) => {
-    if (!selectedEmail || !selectedUser) return
-    const newSize = parseInt(value, 10)
-    setMessagesPageSize(newSize)
-    fetchMessages(selectedUser.id, selectedEmail.id, 1, newSize)
   }
 
   const handleRefreshMessages = async () => {

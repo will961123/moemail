@@ -1,7 +1,7 @@
 import { createDb } from "@/lib/db"
 import { eq, and } from "drizzle-orm"
 import { NextResponse } from "next/server"
-import { emails, users, userRoles, roles } from "@/lib/schema"
+import { emails, users } from "@/lib/schema"
 import { getUserId } from "@/lib/apiKey"
 import { ROLES } from "@/lib/permissions"
 

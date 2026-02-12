@@ -1,7 +1,7 @@
 import { createDb } from "@/lib/db"
 import { eq, sql } from "drizzle-orm"
 import { NextResponse } from "next/server"
-import { users, emails, messages } from "@/lib/schema"
+import { emails, messages } from "@/lib/schema"
 import { getUserId } from "@/lib/apiKey"
 
 export const runtime = "edge"
@@ -9,14 +9,6 @@ export const runtime = "edge"
 const DEFAULT_PAGE_SIZE = 10
 const MIN_PAGE_SIZE = 1
 const MAX_PAGE_SIZE = 100
-
-// 角色权重映射
-const ROLE_WEIGHTS: Record<string, number> = {
-  'emperor': 4,
-  'duke': 3,
-  'knight': 2,
-  'civilian': 1,
-}
 
 export async function GET(request: Request) {
   const userId = await getUserId()

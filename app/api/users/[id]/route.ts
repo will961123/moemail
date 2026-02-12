@@ -1,6 +1,6 @@
 import { createDb } from "@/lib/db"
 import { NextResponse } from "next/server"
-import { users, userRoles, emails, messages } from "@/lib/schema"
+import { users } from "@/lib/schema"
 import { eq } from "drizzle-orm"
 import { getUserId } from "@/lib/apiKey"
 
