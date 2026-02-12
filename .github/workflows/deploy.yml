@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Get full git history for checking file changes
+          fetch-depth: 0
 
       - name: Get previous tag
         id: previoustag
@@ -34,6 +34,50 @@ jobs:
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
+
+      # 🔍 在这里添加调试步骤 - 在 deploy 之前
+      - name: Debug environment variables
+        run: |
+          echo "=== 检查 Cloudflare 认证环境变量 ==="
+          echo "CLOUDFLARE_API_TOKEN 是否设置: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && '✅ 已设置' || '❌ 未设置' }}"
+          echo "CLOUDFLARE_API_TOKEN 长度: ${#CLOUDFLARE_API_TOKEN}"
+          echo "CLOUDFLARE_ACCOUNT_ID 是否设置: ${{ secrets.CLOUDFLARE_ACCOUNT_ID != '' && '✅ 已设置' || '❌ 未设置' }}"
+          echo "CLOUDFLARE_ACCOUNT_ID: $CLOUDFLARE_ACCOUNT_ID"
+          
+          echo ""
+          echo "=== 检查项目配置变量 ==="
+          echo "PROJECT_NAME: $PROJECT_NAME"
+          echo "DATABASE_NAME: $DATABASE_NAME"
+          echo "DATABASE_ID: $DATABASE_ID"
+          
+          echo ""
+          echo "=== 测试 Cloudflare API Token ==="
+          if [ -n "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "正在验证 API Token..."
+            response=$(curl -s -w "\n%{http_code}" \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              -H "Content-Type: application/json" \
+              "https://api.cloudflare.com/client/v4/user/tokens/verify")
+          
+            http_code=$(echo "$response" | tail -n1)
+            body=$(echo "$response" | sed '$d')
+          
+            if [ "$http_code" = "200" ]; then
+              echo "✅ API Token 验证成功"
+              echo "Token 状态: $(echo $body | jq -r '.result.status')"
+            else
+              echo "❌ API Token 验证失败 (HTTP $http_code)"
+              echo "错误信息: $(echo $body | jq -r '.errors[0].message // "未知错误"')"
+            fi
+          else
+            echo "❌ CLOUDFLARE_API_TOKEN 为空"
+          fi
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          PROJECT_NAME: ${{ secrets.PROJECT_NAME }}
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+          DATABASE_ID: ${{ secrets.DATABASE_ID }}
 
       - name: Run deploy script
         env:
