@@ -61,16 +61,32 @@ export async function middleware(request: Request) {
   const segments = pathname.split('/')
   const maybeLocale = segments[1]
   const hasLocalePrefix = i18n.locales.includes(maybeLocale as any)
-  if (!hasLocalePrefix) {
-    const cookieLocale = request.headers.get('Cookie')?.match(/NEXT_LOCALE=([^;]+)/)?.[1]
-    const acceptLanguage = request.headers.get('Accept-Language')
-    const preferredLocale = resolvePreferredLocale(cookieLocale, acceptLanguage)
-    const targetLocale = preferredLocale ?? i18n.defaultLocale
-    const redirectURL = new URL(`/${targetLocale}${pathname}${url.search}`, request.url)
-    return NextResponse.redirect(redirectURL)
+
+  if (hasLocalePrefix) {
+    // 如果 URL 包含默认语言前缀，重定向到不带前缀的 URL（as-needed 策略）
+    if (maybeLocale === i18n.defaultLocale) {
+      const pathWithoutLocale = '/' + segments.slice(2).join('/')
+      const redirectURL = new URL(`${pathWithoutLocale}${url.search}`, request.url)
+      return NextResponse.redirect(redirectURL)
+    }
+    return NextResponse.next()
   }
 
-  return NextResponse.next()
+  // 如果没有语言前缀，检测用户语言偏好
+  const cookieLocale = request.headers.get('Cookie')?.match(/NEXT_LOCALE=([^;]+)/)?.[1]
+  const acceptLanguage = request.headers.get('Accept-Language')
+  const preferredLocale = resolvePreferredLocale(cookieLocale, acceptLanguage)
+  const targetLocale = preferredLocale ?? i18n.defaultLocale
+
+  // 如果目标语言是默认语言，使用 rewrite 内部重写路径（浏览器 URL 不变）
+  if (targetLocale === i18n.defaultLocale) {
+    const rewriteURL = new URL(`/${targetLocale}${pathname}${url.search}`, request.url)
+    return NextResponse.rewrite(rewriteURL)
+  }
+
+  // 非默认语言才添加前缀并重定向（浏览器 URL 改变）
+  const redirectURL = new URL(`/${targetLocale}${pathname}${url.search}`, request.url)
+  return NextResponse.redirect(redirectURL)
 }
 
 function resolvePreferredLocale(cookieLocale: string | undefined, acceptLanguageHeader: string | null): Locale | null {
