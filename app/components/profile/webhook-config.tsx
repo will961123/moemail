@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -28,8 +28,14 @@ export function WebhookConfig() {
   const [showDocs, setShowDocs] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)
   const { toast } = useToast()
+  const isFetchingRef = useRef(false)
 
   useEffect(() => {
+    if (isFetchingRef.current) {
+      return
+    }
+
+    isFetchingRef.current = true
     fetch("/api/webhook")
       .then(res => res.json() as Promise<{ enabled: boolean; url: string }>)
       .then(data => {
@@ -37,7 +43,10 @@ export function WebhookConfig() {
         setUrl(data.url)
       })
       .catch(console.error)
-      .finally(() => setInitialLoading(false))
+      .finally(() => {
+        setInitialLoading(false)
+        isFetchingRef.current = false
+      })
   }, [])
 
   if (initialLoading) {

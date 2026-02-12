@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Zap, Eye, EyeOff } from "lucide-react"
@@ -34,12 +34,18 @@ export function EmailServiceConfig() {
   const [loading, setLoading] = useState(false)
   const [showToken, setShowToken] = useState(false)
   const { toast } = useToast()
+  const isFetchingRef = useRef(false)
 
   useEffect(() => {
     fetchConfig()
   }, [])
 
   const fetchConfig = async () => {
+    if (isFetchingRef.current) {
+      return
+    }
+
+    isFetchingRef.current = true
     try {
       const res = await fetch("/api/config/email-service")
       if (res.ok) {
@@ -48,6 +54,8 @@ export function EmailServiceConfig() {
       }
     } catch (error) {
       console.error("Failed to fetch email service config:", error)
+    } finally {
+      isFetchingRef.current = false
     }
   }
 
@@ -87,13 +95,7 @@ export function EmailServiceConfig() {
   }
 
   return (
-    <div className="bg-background rounded-lg border-2 border-primary/20 p-6">
-      <div className="flex items-center gap-2 mb-6">
-        <Zap className="w-5 h-5 text-primary" />
-        <h2 className="text-lg font-semibold">{t("title")}</h2>
-      </div>
-
-      <div className="space-y-4">
+    <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <Label htmlFor="enabled" className="text-sm font-medium">
@@ -252,7 +254,7 @@ export function EmailServiceConfig() {
           </>
         )}
 
-        <Button 
+        <Button
           onClick={handleSave}
           disabled={loading}
           className="w-full"
@@ -260,6 +262,5 @@ export function EmailServiceConfig() {
           {loading ? t("saving") : t("save")}
         </Button>
       </div>
-    </div>
   )
 } 

@@ -2,9 +2,8 @@
 
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
-import { Settings } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Role, ROLES } from "@/lib/permissions"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
@@ -32,33 +31,42 @@ export function WebsiteConfigPanel() {
   const [showSecretKey, setShowSecretKey] = useState(false)
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
-
+  const isFetchingRef = useRef(false)
 
   useEffect(() => {
     fetchConfig()
   }, [])
 
   const fetchConfig = async () => {
-    const res = await fetch("/api/config")
-    if (res.ok) {
-      const data = await res.json() as { 
-        defaultRole: Exclude<Role, typeof ROLES.EMPEROR>,
-        emailDomains: string,
-        adminContact: string,
-        maxEmails: string,
-        turnstile?: {
-          enabled: boolean,
-          siteKey: string,
-          secretKey?: string
+    if (isFetchingRef.current) {
+      return
+    }
+
+    isFetchingRef.current = true
+    try {
+      const res = await fetch("/api/config")
+      if (res.ok) {
+        const data = await res.json() as {
+          defaultRole: Exclude<Role, typeof ROLES.EMPEROR>,
+          emailDomains: string,
+          adminContact: string,
+          maxEmails: string,
+          turnstile?: {
+            enabled: boolean,
+            siteKey: string,
+            secretKey?: string
+          }
         }
+        setDefaultRole(data.defaultRole)
+        setEmailDomains(data.emailDomains)
+        setAdminContact(data.adminContact)
+        setMaxEmails(data.maxEmails || EMAIL_CONFIG.MAX_ACTIVE_EMAILS.toString())
+        setTurnstileEnabled(Boolean(data.turnstile?.enabled))
+        setTurnstileSiteKey(data.turnstile?.siteKey ?? "")
+        setTurnstileSecretKey(data.turnstile?.secretKey ?? "")
       }
-      setDefaultRole(data.defaultRole)
-      setEmailDomains(data.emailDomains)
-      setAdminContact(data.adminContact)
-      setMaxEmails(data.maxEmails || EMAIL_CONFIG.MAX_ACTIVE_EMAILS.toString())
-      setTurnstileEnabled(Boolean(data.turnstile?.enabled))
-      setTurnstileSiteKey(data.turnstile?.siteKey ?? "")
-      setTurnstileSecretKey(data.turnstile?.secretKey ?? "")
+    } finally {
+      isFetchingRef.current = false
     }
   }
 
@@ -68,8 +76,8 @@ export function WebsiteConfigPanel() {
       const res = await fetch("/api/config", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          defaultRole, 
+        body: JSON.stringify({
+          defaultRole,
           emailDomains,
           adminContact,
           maxEmails: maxEmails || EMAIL_CONFIG.MAX_ACTIVE_EMAILS.toString(),
@@ -99,13 +107,7 @@ export function WebsiteConfigPanel() {
   }
 
   return (
-    <div className="bg-background rounded-lg border-2 border-primary/20 p-6">
-      <div className="flex items-center gap-2 mb-6">
-        <Settings className="w-5 h-5 text-primary" />
-        <h2 className="text-lg font-semibold">{t("title")}</h2>
-      </div>
-
-      <div className="space-y-4">
+    <div className="space-y-4">
         <div className="flex items-center gap-4">
           <span className="text-sm">{t("defaultRole")}:</span>
           <Select value={defaultRole} onValueChange={setDefaultRole}>
@@ -123,7 +125,7 @@ export function WebsiteConfigPanel() {
         <div className="flex items-center gap-4">
           <span className="text-sm">{t("emailDomains")}:</span>
           <div className="flex-1">
-            <Input 
+            <Input
               value={emailDomains}
               onChange={(e) => setEmailDomains(e.target.value)}
               placeholder={t("emailDomainsPlaceholder")}
@@ -134,7 +136,7 @@ export function WebsiteConfigPanel() {
         <div className="flex items-center gap-4">
           <span className="text-sm">{t("adminContact")}:</span>
           <div className="flex-1">
-            <Input 
+            <Input
               value={adminContact}
               onChange={(e) => setAdminContact(e.target.value)}
               placeholder={t("adminContactPlaceholder")}
@@ -145,7 +147,7 @@ export function WebsiteConfigPanel() {
         <div className="flex items-center gap-4">
           <span className="text-sm">{t("maxEmails")}:</span>
           <div className="flex-1">
-            <Input 
+            <Input
               type="number"
               min="1"
               max="100"
@@ -213,7 +215,7 @@ export function WebsiteConfigPanel() {
           </div>
         </div>
 
-        <Button 
+        <Button
           onClick={handleSave}
           disabled={loading}
           className="w-full"
@@ -221,6 +223,5 @@ export function WebsiteConfigPanel() {
           {t("save")}
         </Button>
       </div>
-    </div>
   )
-} 
+}

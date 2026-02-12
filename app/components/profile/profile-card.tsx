@@ -5,7 +5,7 @@ import { useTranslations, useLocale } from "next-intl"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { signOut } from "next-auth/react"
-import { Github, Settings, Crown, Sword, User2, Gem, Mail } from "lucide-react"
+import { Github, Settings, Crown, Sword, User2, Gem, Mail, Zap, Key } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { WebhookConfig } from "./webhook-config"
 import { PromotePanel } from "./promote-panel"
@@ -14,6 +14,7 @@ import { useRolePermission } from "@/hooks/use-role-permission"
 import { PERMISSIONS } from "@/lib/permissions"
 import { WebsiteConfigPanel } from "./website-config-panel"
 import { ApiKeyPanel } from "./api-key-panel"
+import { CollapsibleCard } from "@/components/ui/collapsible-card"
 
 interface ProfileCardProps {
   user: User
@@ -62,6 +63,10 @@ export function ProfileCard({ user }: ProfileCardProps) {
   const t = useTranslations("profile.card")
   const tAuth = useTranslations("auth.signButton")
   const tWebhook = useTranslations("profile.webhook")
+  const tWebsite = useTranslations("profile.website")
+  const tEmailService = useTranslations("profile.emailService")
+  const tPromote = useTranslations("profile.promote")
+  const tApiKey = useTranslations("profile.apiKey")
   const tNav = useTranslations("common.nav")
   const locale = useLocale()
   const router = useRouter()
@@ -136,19 +141,34 @@ export function ProfileCard({ user }: ProfileCardProps) {
       </div>
 
       {canManageWebhook && (
-        <div className="bg-background rounded-lg border-2 border-primary/20 p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Settings className="w-5 h-5 text-primary" />
-            <h2 className="text-lg font-semibold">{tWebhook("title")}</h2>
-          </div>
+        <CollapsibleCard title={tWebhook("title")} icon={Settings} defaultOpen={false}>
           <WebhookConfig />
-        </div>
+        </CollapsibleCard>
       )}
 
-      {canManageConfig && <WebsiteConfigPanel />}
-      {canManageConfig && <EmailServiceConfig />}
-      {canPromote && <PromotePanel />}
-      {canManageWebhook && <ApiKeyPanel />}
+      {canManageConfig && (
+        <CollapsibleCard title={tWebsite("title")} icon={Settings} defaultOpen={false}>
+          <WebsiteConfigPanel />
+        </CollapsibleCard>
+      )}
+
+      {canManageConfig && (
+        <CollapsibleCard title={tEmailService("title")} icon={Zap} defaultOpen={false}>
+          <EmailServiceConfig />
+        </CollapsibleCard>
+      )}
+
+      {canPromote && (
+        <CollapsibleCard title={tPromote("title")} icon={Gem} defaultOpen={false}>
+          <PromotePanel />
+        </CollapsibleCard>
+      )}
+
+      {canManageWebhook && (
+        <CollapsibleCard title={tApiKey("title")} icon={Key} defaultOpen={false}>
+          <ApiKeyPanel />
+        </CollapsibleCard>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-4 px-1">
         <Button

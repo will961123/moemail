@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -48,8 +48,14 @@ export function ApiKeyPanel() {
   const [isLoading, setIsLoading] = useState(true)
   const { checkPermission } = useRolePermission()
   const canManageApiKey = checkPermission(PERMISSIONS.MANAGE_API_KEY)
+  const isFetchingRef = useRef(false)
 
   const fetchApiKeys = async () => {
+    if (isFetchingRef.current) {
+      return
+    }
+
+    isFetchingRef.current = true
     try {
       const res = await fetch("/api/api-keys")
       if (!res.ok) throw new Error(t("createFailed"))
@@ -64,6 +70,7 @@ export function ApiKeyPanel() {
       })
     } finally {
       setIsLoading(false)
+      isFetchingRef.current = false
     }
   }
 
@@ -158,21 +165,16 @@ export function ApiKeyPanel() {
   }
 
   return (
-    <div className="bg-background rounded-lg border-2 border-primary/20 p-6 space-y-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <Key className="w-5 h-5 text-primary" />
-          <h2 className="text-lg font-semibold">{t("title")}</h2>
-        </div>
-        {
-          canManageApiKey && (
-            <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="gap-2" onClick={() => setCreateDialogOpen(true)}>
-                  <Plus className="w-4 h-4" />
-                  {t("create")}
-                </Button>
-              </DialogTrigger>
+    <div className="space-y-6">
+      {canManageApiKey && (
+        <div className="flex justify-end">
+          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2" onClick={() => setCreateDialogOpen(true)}>
+                <Plus className="w-4 h-4" />
+                {t("create")}
+              </Button>
+            </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>
@@ -243,12 +245,10 @@ export function ApiKeyPanel() {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-          )
-        }
-      </div>
+        </div>
+      )}
 
-      {
-        !canManageApiKey ? (
+      {!canManageApiKey ? (
           <div className="text-center text-muted-foreground py-8">
             <p>{tNoPermission("needPermission")}</p>
             <p className="mt-2">{tNoPermission("contactAdmin")}</p>

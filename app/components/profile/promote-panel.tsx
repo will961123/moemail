@@ -110,13 +110,7 @@ export function PromotePanel() {
   const Icon = roleIcons[targetRole]
 
   return (
-    <div className="bg-background rounded-lg border-2 border-primary/20 p-6">
-      <div className="flex items-center gap-2 mb-6">
-        <Icon className="w-5 h-5 text-primary" />
-        <h2 className="text-lg font-semibold">{t("title")}</h2>
-      </div>
-
-      <div className="space-y-4">
+    <div className="space-y-4">
         <div className="flex gap-4">
           <div className="flex-1">
             <Input
@@ -164,6 +158,5 @@ export function PromotePanel() {
           )}
         </Button>
       </div>
-    </div>
   )
 } 
