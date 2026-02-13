@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
-import { Loader2 } from "lucide-react"
+import { Gem, Sword, User2, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { useToast } from "@/components/ui/use-toast"
