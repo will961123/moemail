@@ -26,7 +26,6 @@ interface UsersResponse {
   total: number
   page: number
   pageSize: number
-  error?: string
 }
 
 interface UserEmail {
@@ -149,10 +148,13 @@ export function UserManagementPanel() {
       const url = `/api/users?${params.toString()}`
 
       const res = await fetch(url)
+
+      if (!res.ok) {
+        const error = await res.json() as { error: string }
+        throw new Error(error.error || t("fetchFailed"))
+      }
+
       const data = await res.json() as UsersResponse
-
-      if (!res.ok) throw new Error(data.error || "获取用户列表失败")
-
       setUsers(data.users)
       setTotal(data.total)
     } catch (error) {
@@ -200,12 +202,13 @@ export function UserManagementPanel() {
       })
 
       const res = await fetch(`/api/users/${userId}/emails?${params.toString()}`)
-      const data = await res.json() as UserEmailsResponse
 
       if (!res.ok) {
-        throw new Error(data.error || t("fetchEmailsFailed"))
+        const error = await res.json() as { error: string }
+        throw new Error(error.error || t("fetchEmailsFailed"))
       }
 
+      const data = await res.json() as UserEmailsResponse
       setUserEmails(data.emails)
       setEmailsTotal(data.total)
       setEmailsPage(data.page)
@@ -278,7 +281,7 @@ export function UserManagementPanel() {
       })
 
       if (!res.ok) {
-        const data = await res.json()
+        const data = await res.json() as { error: string }
         throw new Error(data.error || t("deleteFailed"))
       }
 
@@ -319,12 +322,13 @@ export function UserManagementPanel() {
       })
 
       const res = await fetch(`/api/users/${userId}/emails/${emailId}/messages?${params.toString()}`)
-      const data = await res.json() as MessagesResponse
 
       if (!res.ok) {
-        throw new Error(data.error || t("fetchMessagesFailed"))
+        const error = await res.json() as { error: string }
+        throw new Error(error.error || t("fetchMessagesFailed"))
       }
 
+      const data = await res.json() as MessagesResponse
       setMessages(data.messages)
       setMessagesTotal(data.total)
       setMessagesPage(data.page)
@@ -346,12 +350,13 @@ export function UserManagementPanel() {
     setLoadingMessageDetail(true)
     try {
       const res = await fetch(`/api/users/${userId}/emails/${emailId}/messages/${messageId}`)
-      const data = await res.json() as { message: MessageDetail }
 
       if (!res.ok) {
-        throw new Error(data.error || t("fetchMessagesFailed"))
+        const error = await res.json() as { error: string }
+        throw new Error(error.error || t("fetchMessagesFailed"))
       }
 
+      const data = await res.json() as { message: MessageDetail }
       setMessageDetail(data.message)
       if (!data.message.html) {
         setViewMode("text")
@@ -415,7 +420,7 @@ export function UserManagementPanel() {
       })
 
       if (!res.ok) {
-        const error = await res.json()
+        const error = await res.json() as { error: string }
         throw new Error(error.error || t("roleUpdateFailed"))
       }
 
@@ -466,7 +471,7 @@ export function UserManagementPanel() {
       })
 
       if (!res.ok) {
-        const data = await res.json()
+        const data = await res.json() as { error: string }
         throw new Error(data.error || t("deleteFailed"))
       }
 
