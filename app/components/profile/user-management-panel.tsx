@@ -26,6 +26,7 @@ interface UsersResponse {
   total: number
   page: number
   pageSize: number
+  error?: string
 }
 
 interface UserEmail {
@@ -170,6 +171,7 @@ export function UserManagementPanel() {
       initialized.current = true
       fetchUsers()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleSearch = () => {
