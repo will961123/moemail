@@ -57,7 +57,7 @@ jobs:
             response=$(curl -s -w "\n%{http_code}" \
               -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
               -H "Content-Type: application/json" \
-              "https://api.cloudflare.com/client/v4/user/tokens/verify")
+              "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/tokens/verify")
           
             http_code=$(echo "$response" | tail -n1)
             body=$(echo "$response" | sed '$d')
