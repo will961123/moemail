@@ -140,7 +140,14 @@
     "save": "Save Configuration",
     "saving": "Saving...",
     "saveSuccess": "Configuration saved successfully",
-    "saveFailed": "Failed to save configuration"
+    "saveFailed": "Failed to save configuration",
+    "registration": {
+      "title": "Registration Methods",
+      "description": "Control allowed user registration methods",
+      "github": "Allow GitHub Registration",
+      "google": "Allow Google Registration",
+      "credentials": "Allow Password Registration"
+    }
   },
   "promote": {
     "title": "Role Management",

@@ -16,7 +16,8 @@ export async function GET() {
     maxEmails,
     turnstileEnabled,
     turnstileSiteKey,
-    turnstileSecretKey
+    turnstileSecretKey,
+    registrationConfig
   ] = await Promise.all([
     env.SITE_CONFIG.get("DEFAULT_ROLE"),
     env.SITE_CONFIG.get("EMAIL_DOMAINS"),
@@ -24,8 +25,13 @@ export async function GET() {
     env.SITE_CONFIG.get("MAX_EMAILS"),
     env.SITE_CONFIG.get("TURNSTILE_ENABLED"),
     env.SITE_CONFIG.get("TURNSTILE_SITE_KEY"),
-    env.SITE_CONFIG.get("TURNSTILE_SECRET_KEY")
+    env.SITE_CONFIG.get("TURNSTILE_SECRET_KEY"),
+    env.SITE_CONFIG.get("REGISTRATION_CONFIG")
   ])
+
+  const registration = registrationConfig
+    ? JSON.parse(registrationConfig)
+    : { github: true, google: true, credentials: true }
 
   return Response.json({
     defaultRole: defaultRole || ROLES.CIVILIAN,
@@ -36,7 +42,8 @@ export async function GET() {
       enabled: turnstileEnabled === "true",
       siteKey: turnstileSiteKey || "",
       secretKey: turnstileSecretKey || "",
-    } : undefined
+    } : undefined,
+    registration: canManageConfig ? registration : undefined
   })
 }
 
@@ -54,8 +61,9 @@ export async function POST(request: Request) {
     emailDomains,
     adminContact,
     maxEmails,
-    turnstile
-  } = await request.json() as { 
+    turnstile,
+    registration
+  } = await request.json() as {
     defaultRole: Exclude<Role, typeof ROLES.EMPEROR>,
     emailDomains: string,
     adminContact: string,
@@ -64,6 +72,11 @@ export async function POST(request: Request) {
       enabled: boolean,
       siteKey: string,
       secretKey: string
+    },
+    registration?: {
+      github: boolean,
+      google: boolean,
+      credentials: boolean
     }
   }
   
@@ -81,6 +94,12 @@ export async function POST(request: Request) {
     return Response.json({ error: "Turnstile 启用时需要提供 Site Key 和 Secret Key" }, { status: 400 })
   }
 
+  const registrationConfig = registration ?? {
+    github: true,
+    google: true,
+    credentials: true
+  }
+
   const env = getRequestContext().env
   await Promise.all([
     env.SITE_CONFIG.put("DEFAULT_ROLE", defaultRole),
@@ -89,7 +108,8 @@ export async function POST(request: Request) {
     env.SITE_CONFIG.put("MAX_EMAILS", maxEmails),
     env.SITE_CONFIG.put("TURNSTILE_ENABLED", turnstileConfig.enabled.toString()),
     env.SITE_CONFIG.put("TURNSTILE_SITE_KEY", turnstileConfig.siteKey),
-    env.SITE_CONFIG.put("TURNSTILE_SECRET_KEY", turnstileConfig.secretKey)
+    env.SITE_CONFIG.put("TURNSTILE_SECRET_KEY", turnstileConfig.secretKey),
+    env.SITE_CONFIG.put("REGISTRATION_CONFIG", JSON.stringify(registrationConfig))
   ])
 
   return Response.json({ success: true })

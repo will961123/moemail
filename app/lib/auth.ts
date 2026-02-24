@@ -182,6 +182,56 @@ export const {
     },
   },
   callbacks: {
+    async signIn({ user, account, profile }) {
+      // 如果不是 OAuth 登录，直接允许（credentials 登录在 authorize 中已经验证）
+      if (!account || account.provider === "credentials") {
+        return true
+      }
+
+      // 如果是 OAuth 登录，检查注册配置
+      if (account.provider === "github" || account.provider === "google") {
+        const db = createDb()
+        const env = getRequestContext().env
+
+        // 读取注册配置
+        const registrationConfigJson = await env.SITE_CONFIG.get("REGISTRATION_CONFIG")
+        const registrationConfig = registrationConfigJson
+          ? JSON.parse(registrationConfigJson)
+          : { github: true, google: true, credentials: true }
+
+        // 检查该 provider 是否允许注册
+        const isAllowed = account.provider === "github"
+          ? registrationConfig.github
+          : registrationConfig.google
+
+        if (!isAllowed) {
+          // 不允许注册，检查用户是否是刚创建的
+          const userRecord = await db.query.users.findFirst({
+            where: eq(users.id, user.id)
+          })
+
+          if (userRecord) {
+            const createdAt = new Date(userRecord.createdAt)
+            const now = new Date()
+            const diffInSeconds = (now.getTime() - createdAt.getTime()) / 1000
+
+            // 如果用户是在 10 秒内创建的，说明是新用户，删除记录
+            if (diffInSeconds < 10) {
+              await db.delete(accounts).where(eq(accounts.userId, user.id))
+              await db.delete(users).where(eq(users.id, user.id))
+              return false
+            }
+          }
+
+          // 如果用户不是新创建的，说明是老用户，允许登录
+          return true
+        }
+
+        return true
+      }
+
+      return true
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
