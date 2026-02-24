@@ -56,6 +56,7 @@ export async function GET(
           createdAt: email.createdAt,
           expiresAt: email.expiresAt,
           messageCount,
+          isExpired: email.expiresAt <= new Date(),
         }
       })
     )

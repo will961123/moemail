@@ -1,11 +1,10 @@
 "use client"
 
-import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Mail, RefreshCw, ChevronLeft, ChevronRight, Send, Inbox } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Tabs, SlidingTabsList, SlidingTabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Tabs, SlidingTabsList, SlidingTabsTrigger } from "@/components/ui/tabs"
 import {
   Select,
   SelectContent,
@@ -93,7 +92,7 @@ export function UserMessageListColumn({
       </div>
 
       {selectedEmailAddress && (
-        <Tabs value={messageType} onValueChange={onMessageTypeChange} className="flex-1 flex flex-col overflow-hidden">
+        <Tabs value={messageType} onValueChange={(value) => onMessageTypeChange(value as 'received' | 'sent')} className="flex-1 flex flex-col overflow-hidden">
           <div className="p-2 border-b border-primary/20 shrink-0">
             <SlidingTabsList>
               <SlidingTabsTrigger value="received">

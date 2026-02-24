@@ -34,6 +34,7 @@ interface UserEmail {
   createdAt: string
   expiresAt: string
   messageCount: number
+  isExpired: boolean
 }
 
 interface UserEmailsResponse {

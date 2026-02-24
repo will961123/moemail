@@ -18,6 +18,7 @@ interface UserEmail {
   createdAt: string
   expiresAt: string
   messageCount: number
+  isExpired: boolean
 }
 
 interface UserEmailListColumnProps {
@@ -102,7 +103,12 @@ export function UserEmailListColumn({
               >
                 <Mail className="h-4 w-4 text-primary/60" />
                 <div className="truncate flex-1">
-                  <div className="font-medium truncate">{email.address}</div>
+                  <div className="font-medium flex items-center gap-2">
+                    <span className="truncate">{email.address}</span>
+                    {email.isExpired && (
+                      <span className="text-xs text-red-500 font-normal flex-shrink-0">{tList("expired")}</span>
+                    )}
+                  </div>
                   <div className="text-xs text-gray-500">
                     {new Date(email.expiresAt).getFullYear() === 9999 ? (
                       tList("permanent")

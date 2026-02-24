@@ -23,6 +23,7 @@
     "noEmails": "No emails yet, create one!",
     "expiresAt": "Expires",
     "permanent": "Permanent",
+    "expired": "Expired",
     "deleteConfirm": "Confirm Delete",
     "deleteDescription": "Are you sure you want to delete {email}? This will also delete all messages in this mailbox and cannot be undone.",
     "deleteSuccess": "Email deleted successfully",
