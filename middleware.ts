@@ -129,12 +129,12 @@ function matchLocale(lang: string): Locale | null {
 
   // Handle Chinese variants with explicit regions or scripts
   if (base === 'zh') {
-    if (lang.includes('tw') || lang.includes('hk') || lang.includes('mo') || lang.includes('hant')) {
-      return 'zh-TW'
-    }
-    if (lang.includes('cn') || lang.includes('sg') || lang.includes('hans')) {
-      return 'zh-CN'
-    }
+    // if (lang.includes('tw') || lang.includes('hk') || lang.includes('mo') || lang.includes('hant')) {
+    //   return 'zh-TW'
+    // }
+    // if (lang.includes('cn') || lang.includes('sg') || lang.includes('hans')) {
+    //   return 'zh-CN'
+    // }
     // default Chinese fallback
     return 'zh-CN'
   }
@@ -154,4 +154,4 @@ export const config = {
     '/api/config/:path*',
     '/api/api-keys/:path*',
   ]
-} 
+}
