@@ -182,7 +182,7 @@ export const {
     },
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       // 如果不是 OAuth 登录，直接允许（credentials 登录在 authorize 中已经验证）
       if (!account || account.provider === "credentials") {
         return true
