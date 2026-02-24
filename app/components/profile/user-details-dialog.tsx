@@ -28,7 +28,9 @@ interface User {
   email: string | null
   username: string | null
   emailCount: number
-  messageCount: number
+  receivedCount: number
+  sentCount: number
+  createdAt: string
   roles: Array<{
     id: string
     name: string
