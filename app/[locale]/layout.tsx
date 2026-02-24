@@ -46,7 +46,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "metadata" })
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://moemail.app"
-  
+
   // Generate hreflang links for all supported locales
   const languages: Record<string, string> = {}
   i18n.locales.forEach((loc) => {
@@ -70,7 +70,8 @@ export async function generateMetadata({
     },
     openGraph: {
       type: "website",
-      locale: locale === "zh-CN" ? "zh_CN" : locale === "zh-TW" ? "zh_TW" : locale,
+      // locale: locale === "zh-CN" ? "zh_CN" : locale === "zh-TW" ? "zh_TW" : locale,
+      locale: locale === "zh-CN" ? "zh_CN" : locale,
       url: `${baseUrl}/${locale}`,
       title: t("title"),
       description: t("description"),
@@ -117,7 +118,7 @@ export default async function LocaleLayout({
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
-      <body 
+      <body
         className={cn(
           zpix.variable,
           "font-zpix min-h-screen antialiased",
