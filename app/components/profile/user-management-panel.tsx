@@ -114,6 +114,7 @@ export function UserManagementPanel() {
   const [messagesPage, setMessagesPage] = useState(1)
   const [messagesPageSize, setMessagesPageSize] = useState(10)
   const [messagesTotal, setMessagesTotal] = useState(0)
+  const [messageType, setMessageType] = useState<'received' | 'sent'>('received')
 
   // 邮件详情相关状态
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null)
@@ -236,12 +237,12 @@ export function UserManagementPanel() {
     await fetchUserEmails(user.id, 1, emailsPageSize)
   }
 
-  const handleEmailSelect = async (email: UserEmail) => {
+  const handleEmailSelect = async (email: UserEmail | null) => {
     setSelectedEmail(email)
     setMessagesPage(1)
     setSelectedMessageId(null)
     setMessageDetail(null)
-    if (selectedUser) {
+    if (selectedUser && email) {
       await fetchMessages(selectedUser.id, email.id, 1, messagesPageSize)
     }
   }
@@ -259,8 +260,8 @@ export function UserManagementPanel() {
     const isEmperor = selectedUser?.roles.some(r => r.name === ROLES.EMPEROR)
     if (isEmperor) {
       toast({
-        title: t("deleteFailed"),
-        description: t("cannotDeleteEmperor"),
+        title: t("emailDeleteFailed"),
+        description: t("cannotDeleteEmperorEmail"),
         variant: "destructive"
       })
       return
@@ -282,11 +283,11 @@ export function UserManagementPanel() {
 
       if (!res.ok) {
         const data = await res.json() as { error: string }
-        throw new Error(data.error || t("deleteFailed"))
+        throw new Error(data.error || t("emailDeleteFailed"))
       }
 
       toast({
-        title: t("deleteSuccess"),
+        title: t("emailDeleteSuccess"),
         description: t("emailDeleteDescription", { address: emailToDelete.address })
       })
 
@@ -297,8 +298,8 @@ export function UserManagementPanel() {
       fetchUsers(currentPage)
     } catch (error) {
       toast({
-        title: t("deleteFailed"),
-        description: error instanceof Error ? error.message : t("deleteFailed"),
+        title: t("emailDeleteFailed"),
+        description: error instanceof Error ? error.message : t("emailDeleteFailed"),
         variant: "destructive"
       })
     } finally {
@@ -311,7 +312,8 @@ export function UserManagementPanel() {
     userId: string,
     emailId: string,
     page: number = messagesPage,
-    size: number = messagesPageSize
+    size: number = messagesPageSize,
+    type?: 'received' | 'sent'
   ) => {
     setLoadingMessages(true)
 
@@ -320,6 +322,11 @@ export function UserManagementPanel() {
         page: page.toString(),
         pageSize: size.toString(),
       })
+
+      const currentType = type ?? messageType
+      if (currentType === 'sent') {
+        params.set('type', 'sent')
+      }
 
       const res = await fetch(`/api/users/${userId}/emails/${emailId}/messages?${params.toString()}`)
 
@@ -375,9 +382,9 @@ export function UserManagementPanel() {
     }
   }
 
-  const handleMessageSelect = async (messageId: string) => {
+  const handleMessageSelect = async (messageId: string | null) => {
     setSelectedMessageId(messageId)
-    if (selectedUser && selectedEmail) {
+    if (selectedUser && selectedEmail && messageId) {
       await fetchMessageDetail(selectedUser.id, selectedEmail.id, messageId)
     }
   }
@@ -388,6 +395,17 @@ export function UserManagementPanel() {
     setMessagesPage(1)
     await fetchMessages(selectedUser.id, selectedEmail.id, 1, messagesPageSize)
     setRefreshingMessages(false)
+  }
+
+  const handleMessageTypeChange = async (type: 'received' | 'sent') => {
+    setMessageType(type)
+    setMessages([])
+    setMessagesPage(1)
+    setSelectedMessageId(null)
+    setMessageDetail(null)
+    if (selectedUser && selectedEmail) {
+      await fetchMessages(selectedUser.id, selectedEmail.id, 1, messagesPageSize, type)
+    }
   }
 
   const handleRoleChange = async (user: User, newRole: RoleWithoutEmperor) => {
@@ -565,6 +583,7 @@ export function UserManagementPanel() {
         messagesPage={messagesPage}
         messagesPageSize={messagesPageSize}
         messagesTotal={messagesTotal}
+        messageType={messageType}
         selectedMessageId={selectedMessageId}
         onMessageSelect={handleMessageSelect}
         onRefreshMessages={handleRefreshMessages}
@@ -579,6 +598,7 @@ export function UserManagementPanel() {
             fetchMessages(selectedUser.id, selectedEmail.id, 1, pageSize)
           }
         }}
+        onMessageTypeChange={handleMessageTypeChange}
         messageDetail={messageDetail}
         loadingMessageDetail={loadingMessageDetail}
         viewMode={viewMode}

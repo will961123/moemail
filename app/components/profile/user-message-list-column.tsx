@@ -1,9 +1,11 @@
 "use client"
 
+import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
-import { Mail, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react"
+import { Mail, RefreshCw, ChevronLeft, ChevronRight, Send, Inbox } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Tabs, SlidingTabsList, SlidingTabsTrigger, TabsContent } from "@/components/ui/tabs"
 import {
   Select,
   SelectContent,
@@ -30,10 +32,12 @@ interface UserMessageListColumnProps {
   total: number
   selectedMessageId: string | null
   selectedEmailAddress: string | null
-  onMessageSelect: (messageId: string) => void
+  messageType: 'received' | 'sent'
+  onMessageSelect: (messageId: string | null) => void
   onRefresh: () => void
   onPageChange: (page: number) => void
   onPageSizeChange: (pageSize: number) => void
+  onMessageTypeChange: (type: 'received' | 'sent') => void
   showBackButton?: boolean
   onBack?: () => void
 }
@@ -47,10 +51,12 @@ export function UserMessageListColumn({
   total,
   selectedMessageId,
   selectedEmailAddress,
+  messageType,
   onMessageSelect,
   onRefresh,
   onPageChange,
   onPageSizeChange,
+  onMessageTypeChange,
   showBackButton = false,
   onBack,
 }: UserMessageListColumnProps) {
@@ -87,7 +93,20 @@ export function UserMessageListColumn({
       </div>
 
       {selectedEmailAddress && (
-        <>
+        <Tabs value={messageType} onValueChange={onMessageTypeChange} className="flex-1 flex flex-col overflow-hidden">
+          <div className="p-2 border-b border-primary/20 shrink-0">
+            <SlidingTabsList>
+              <SlidingTabsTrigger value="received">
+                <Inbox className="h-4 w-4" />
+                {tMessages("received")}
+              </SlidingTabsTrigger>
+              <SlidingTabsTrigger value="sent">
+                <Send className="h-4 w-4" />
+                {tMessages("sent")}
+              </SlidingTabsTrigger>
+            </SlidingTabsList>
+          </div>
+
           <div className="flex-1 overflow-auto">
             {loading ? (
               <div className="p-4 text-center text-sm text-gray-500">{tMessages("loading")}</div>
@@ -113,7 +132,12 @@ export function UserMessageListColumn({
                           {message.subject || t("noSubject")}
                         </p>
                         <div className="mt-1 text-xs text-gray-500 space-y-1">
-                          <p className="truncate">{tMessageView("from")}: {message.from}</p>
+                          <p className="truncate">
+                            {messageType === 'received'
+                              ? `${tMessageView("from")}: ${message.from}`
+                              : `${tMessageView("to")}: ${message.to}`
+                            }
+                          </p>
                           <p>{tMessageView("time")}: {new Date(message.receivedAt).toLocaleString()}</p>
                         </div>
                       </div>
@@ -173,7 +197,7 @@ export function UserMessageListColumn({
               </div>
             </div>
           )}
-        </>
+        </Tabs>
       )}
     </>
   )

@@ -37,6 +37,7 @@ export function UserMessageDetailColumn({
   showBackButton = false,
   onBack,
 }: UserMessageDetailColumnProps) {
+  const t = useTranslations("profile.userManagement")
   const tMessageView = useTranslations("emails.messageView")
   const tLayout = useTranslations("emails.layout")
   const { theme } = useTheme()
@@ -136,7 +137,7 @@ export function UserMessageDetailColumn({
 
   return (
     <>
-      <div className="p-2 border-b-2 border-primary/20 flex items-center justify-between shrink-0">
+      <div className="p-2 border-b-2 border-primary/20 flex items-center justify-between shrink-0 gap-2">
         {showBackButton && onBack && (
           <button
             onClick={onBack}
@@ -145,7 +146,9 @@ export function UserMessageDetailColumn({
             {tLayout("backToMessageList")}
           </button>
         )}
-        <span className="text-sm font-medium">{tLayout("messageContent")}</span>
+        <h2 className="text-sm font-bold px-2">
+          {messageDetail ? tLayout("messageContent") : t("selectMessage")}
+        </h2>
       </div>
 
       <div className="flex-1 overflow-auto">

@@ -79,7 +79,7 @@ interface UserDetailsDialogProps {
   emailsPageSize: number
   emailsTotal: number
   selectedEmail: UserEmail | null
-  onEmailSelect: (email: UserEmail) => void
+  onEmailSelect: (email: UserEmail | null) => void
   onRefreshEmails: () => void
   onEmailsPageChange: (page: number) => void
   onEmailsPageSizeChange: (pageSize: number) => void
@@ -92,11 +92,13 @@ interface UserDetailsDialogProps {
   messagesPage: number
   messagesPageSize: number
   messagesTotal: number
+  messageType: 'received' | 'sent'
   selectedMessageId: string | null
-  onMessageSelect: (messageId: string) => void
+  onMessageSelect: (messageId: string | null) => void
   onRefreshMessages: () => void
   onMessagesPageChange: (page: number) => void
   onMessagesPageSizeChange: (pageSize: number) => void
+  onMessageTypeChange: (type: 'received' | 'sent') => void
 
   // 邮件详情相关
   messageDetail: MessageDetail | null
@@ -133,11 +135,13 @@ export function UserDetailsDialog({
   messagesPage,
   messagesPageSize,
   messagesTotal,
+  messageType,
   selectedMessageId,
   onMessageSelect,
   onRefreshMessages,
   onMessagesPageChange,
   onMessagesPageSizeChange,
+  onMessageTypeChange,
   messageDetail,
   loadingMessageDetail,
   viewMode,
@@ -173,7 +177,7 @@ export function UserDetailsDialog({
           </DialogHeader>
 
           {/* 桌面端三栏布局 */}
-          <div className="hidden lg:grid flex-1 grid-cols-12 gap-4 p-6 min-h-0">
+          <div className="hidden lg:grid flex-1 grid-cols-12 gap-4 px-6 pt-2 pb-6 min-h-0">
             {/* 左栏：邮箱列表 */}
             <div className={cn("col-span-3", columnClass)}>
               <UserEmailListColumn
@@ -201,12 +205,14 @@ export function UserDetailsDialog({
                 page={messagesPage}
                 pageSize={messagesPageSize}
                 total={messagesTotal}
+                messageType={messageType}
                 selectedMessageId={selectedMessageId}
                 selectedEmailAddress={selectedEmail?.address || null}
                 onMessageSelect={onMessageSelect}
                 onRefresh={onRefreshMessages}
                 onPageChange={onMessagesPageChange}
                 onPageSizeChange={onMessagesPageSizeChange}
+                onMessageTypeChange={onMessageTypeChange}
               />
             </div>
 
@@ -222,7 +228,7 @@ export function UserDetailsDialog({
           </div>
 
           {/* 移动端单栏布局 */}
-          <div className="lg:hidden flex-1 p-6 min-h-0">
+          <div className="lg:hidden flex-1 px-6 pt-2 pb-6 min-h-0">
             <div className={cn("h-full", columnClass)}>
               {/* 邮箱列表视图 */}
               {mobileView === "emails" && (
@@ -251,15 +257,17 @@ export function UserDetailsDialog({
                   page={messagesPage}
                   pageSize={messagesPageSize}
                   total={messagesTotal}
+                  messageType={messageType}
                   selectedMessageId={selectedMessageId}
                   selectedEmailAddress={selectedEmail.address}
                   onMessageSelect={onMessageSelect}
                   onRefresh={onRefreshMessages}
                   onPageChange={onMessagesPageChange}
                   onPageSizeChange={onMessagesPageSizeChange}
+                  onMessageTypeChange={onMessageTypeChange}
                   showBackButton={true}
                   onBack={() => {
-                    onEmailSelect(null as any)
+                    onEmailSelect(null)
                   }}
                 />
               )}
@@ -272,7 +280,7 @@ export function UserDetailsDialog({
                   viewMode={viewMode}
                   onViewModeChange={onViewModeChange}
                   showBackButton={true}
-                  onBack={() => onMessageSelect(null as any)}
+                  onBack={() => onMessageSelect(null)}
                 />
               )}
             </div>

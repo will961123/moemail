@@ -24,6 +24,7 @@ export async function GET(
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1', 10)
     const pageSize = parseInt(searchParams.get('pageSize') || '10', 10)
+    const type = searchParams.get('type') || 'received'
     const offset = (page - 1) * pageSize
 
     const db = createDb()
@@ -47,12 +48,18 @@ export async function GET(
     const totalResult = await db
       .select({ count: sql<number>`count(*)` })
       .from(messages)
-      .where(eq(messages.emailId, emailId))
+      .where(and(
+        eq(messages.emailId, emailId),
+        eq(messages.type, type)
+      ))
     const total = Number(totalResult[0].count)
 
     // 获取分页的邮件列表
     const messageList = await db.query.messages.findMany({
-      where: eq(messages.emailId, emailId),
+      where: and(
+        eq(messages.emailId, emailId),
+        eq(messages.type, type)
+      ),
       orderBy: [desc(messages.receivedAt)],
       limit: pageSize,
       offset: offset,

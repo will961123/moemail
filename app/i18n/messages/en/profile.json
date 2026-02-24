@@ -171,6 +171,7 @@
     "cannotChangeEmperor": "Cannot modify Emperor role",
     "cannotModify": "Cannot modify",
     "cannotDeleteEmperor": "Cannot delete users with Emperor role",
+    "cannotDeleteEmperorEmail": "Cannot delete emails of users with Emperor role",
     "viewEmails": "View Emails",
     "fetchEmailsFailed": "Failed to fetch email list",
     "emailsDialogTitle": "{username}'s Email List",
@@ -181,6 +182,8 @@
     "emailMessageCount": "Messages",
     "emailDeleteWarning": "Are you sure you want to delete email {address}? This will delete all messages in this mailbox and cannot be undone.",
     "emailDeleteDescription": "Email {address} has been deleted",
+    "emailDeleteFailed": "Failed to delete email",
+    "emailDeleteSuccess": "Email deleted successfully",
     "viewMessages": "View Messages",
     "messagesDialogTitle": "Messages for {address}",
     "noMessages": "No messages yet",
@@ -193,6 +196,6 @@
     "fetchMessagesFailed": "Failed to fetch messages",
     "close": "Close",
     "selectEmail": "Select an email",
-    "selectMessage": "Select a message"
+    "selectMessage": "Select a message to view details"
   }
 }
