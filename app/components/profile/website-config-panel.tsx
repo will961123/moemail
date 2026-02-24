@@ -8,7 +8,7 @@ import { Role, ROLES } from "@/lib/permissions"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, Loader2 } from "lucide-react"
 import {
   Select,
   SelectContent,
@@ -29,7 +29,11 @@ export function WebsiteConfigPanel() {
   const [turnstileSiteKey, setTurnstileSiteKey] = useState("")
   const [turnstileSecretKey, setTurnstileSecretKey] = useState("")
   const [showSecretKey, setShowSecretKey] = useState(false)
+  const [githubRegistration, setGithubRegistration] = useState(true)
+  const [googleRegistration, setGoogleRegistration] = useState(true)
+  const [credentialsRegistration, setCredentialsRegistration] = useState(true)
   const [loading, setLoading] = useState(false)
+  const [fetching, setFetching] = useState(true)
   const { toast } = useToast()
   const isFetchingRef = useRef(false)
 
@@ -43,6 +47,7 @@ export function WebsiteConfigPanel() {
     }
 
     isFetchingRef.current = true
+    setFetching(true)
     try {
       const res = await fetch("/api/config")
       if (res.ok) {
@@ -67,6 +72,7 @@ export function WebsiteConfigPanel() {
       }
     } finally {
       isFetchingRef.current = false
+      setFetching(false)
     }
   }
 
@@ -108,6 +114,17 @@ export function WebsiteConfigPanel() {
 
   return (
     <div className="space-y-4">
+        {fetching ? (
+          <div className="text-center py-8 space-y-3">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+              <Loader2 className="w-6 h-6 text-primary animate-spin" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">{t("loading")}</p>
+            </div>
+          </div>
+        ) : (
+          <>
         <div className="flex items-center gap-4">
           <span className="text-sm">{t("defaultRole")}:</span>
           <Select value={defaultRole} onValueChange={setDefaultRole}>
@@ -222,6 +239,8 @@ export function WebsiteConfigPanel() {
         >
           {t("save")}
         </Button>
+      </>
+        )}
       </div>
   )
 }

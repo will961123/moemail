@@ -5,6 +5,11 @@ import { emails, messages } from "@/lib/schema"
 import { eq } from "drizzle-orm"
 import { getRequestContext } from "@cloudflare/next-on-pages"
 import { checkSendPermission } from "@/lib/send-permissions"
+import {
+  type ResendApiKeysData,
+  selectApiKey,
+  extractDomain
+} from "@/lib/resend-utils"
 
 export const runtime = "edge"
 
@@ -98,16 +103,28 @@ export async function POST(
     }
 
     const env = getRequestContext().env
-    const apiKey = await env.SITE_CONFIG.get("RESEND_API_KEY")
+    const apiKeysJson = await env.SITE_CONFIG.get("RESEND_API_KEYS")
 
-    if (!apiKey) {
+    if (!apiKeysJson) {
       return NextResponse.json(
         { error: "Resend 发件服务未配置，请联系管理员" },
         { status: 500 }
       )
     }
 
-    await sendWithResend(to, subject, content, email.address, { apiKey })
+    // 解析配置并选择对应的 API Key
+    const apiKeysData: ResendApiKeysData = JSON.parse(apiKeysJson)
+    const selectedKey = selectApiKey(email.address, apiKeysData)
+
+    if (!selectedKey) {
+      const domain = extractDomain(email.address)
+      return NextResponse.json(
+        { error: `未找到域名 ${domain} 的 Resend API Key 配置，请联系管理员` },
+        { status: 500 }
+      )
+    }
+
+    await sendWithResend(to, subject, content, email.address, { apiKey: selectedKey })
 
     await db.insert(messages).values({
       emailId: email.id,
