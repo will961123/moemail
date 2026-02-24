@@ -200,9 +200,11 @@ export const {
 
         // 读取注册配置
         const registrationConfigJson = await env.SITE_CONFIG.get("REGISTRATION_CONFIG")
+        console.log('[registrationConfigStr]:', registrationConfigJson)
         const registrationConfig = registrationConfigJson
           ? JSON.parse(registrationConfigJson)
           : { github: true, google: true, credentials: true }
+        console.log('[registrationConfigJson]:', registrationConfig)
 
         // 检查该 provider 是否允许注册
         const isAllowed = account.provider === "github"
@@ -210,6 +212,8 @@ export const {
           : registrationConfig.google
 
         if (!isAllowed) {
+          console.log('[Auth] Registration not allowed for provider:', account.provider)
+
           // 不允许注册，检查用户是否是刚创建的
           const userRecord = await db.query.users.findFirst({
             where: eq(users.id, user.id)
@@ -220,12 +224,19 @@ export const {
             const now = new Date()
             const diffInSeconds = (now.getTime() - createdAt.getTime()) / 1000
 
-            // 如果用户是在 10 秒内创建的，说明是新用户，删除记录
-            if (diffInSeconds < 10) {
+            console.log('[Auth] User created at:', createdAt.toISOString())
+            console.log('[Auth] Current time:', now.toISOString())
+            console.log('[Auth] Time difference (seconds):', diffInSeconds)
+
+            // 如果用户是在 30 秒内创建的，说明是新用户，删除记录
+            if (diffInSeconds < 30) {
+              console.log('[Auth] Deleting new user (within 30s)')
               await db.delete(accounts).where(eq(accounts.userId, user.id))
               await db.delete(users).where(eq(users.id, user.id))
               return false
             }
+
+            console.log('[Auth] User is old (>30s), allowing login')
           }
 
           // 如果用户不是新创建的，说明是老用户，允许登录
