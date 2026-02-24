@@ -13,6 +13,9 @@ export const users = sqliteTable("user", {
   image: text("image"),
   username: text("username").unique(),
   password: text("password"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
+    .notNull()
+    .$defaultFn(() => new Date()),
 })
 export const accounts = sqliteTable(
   "account",

@@ -1,0 +1,1 @@
+ALTER TABLE `user` ADD `created_at` integer NOT NULL DEFAULT 0;

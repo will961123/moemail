@@ -116,12 +116,19 @@ export async function GET(request: Request) {
         .where(eq(emails.userId, user.id))
       const emailCount = Number(emailCountResult[0].count)
 
-      // 查询邮件数量（通过邮箱关联）
-      const messageCountResult = await db.select({ count: sql<number>`count(*)` })
+      // 查询收件数量
+      const receivedCountResult = await db.select({ count: sql<number>`count(*)` })
         .from(messages)
         .innerJoin(emails, eq(messages.emailId, emails.id))
-        .where(eq(emails.userId, user.id))
-      const messageCount = Number(messageCountResult[0].count)
+        .where(sql`${emails.userId} = ${user.id} AND ${messages.type} = 'received'`)
+      const receivedCount = Number(receivedCountResult[0].count)
+
+      // 查询发件数量
+      const sentCountResult = await db.select({ count: sql<number>`count(*)` })
+        .from(messages)
+        .innerJoin(emails, eq(messages.emailId, emails.id))
+        .where(sql`${emails.userId} = ${user.id} AND ${messages.type} = 'sent'`)
+      const sentCount = Number(sentCountResult[0].count)
 
       return {
         id: user.id,
@@ -130,9 +137,10 @@ export async function GET(request: Request) {
         image: user.image,
         username: user.username,
         emailVerified: user.emailVerified,
-        createdAt: user.id, // 使用 ID 作为创建时间的近似值（UUID 包含时间戳）
+        createdAt: new Date(user.createdAt).toISOString(),
         emailCount,
-        messageCount,
+        receivedCount,
+        sentCount,
         roles: user.userRoles.map(ur => ({
           id: ur.role.id,
           name: ur.role.name,

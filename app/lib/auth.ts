@@ -190,6 +190,11 @@ export const {
 
       // 如果是 OAuth 登录，检查注册配置
       if (account.provider === "github" || account.provider === "google") {
+        // 确保 user.id 存在
+        if (!user.id) {
+          return false
+        }
+
         const db = createDb()
         const env = getRequestContext().env
 

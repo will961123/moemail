@@ -37,7 +37,9 @@ interface User {
   email: string | null
   username: string | null
   emailCount: number
-  messageCount: number
+  receivedCount: number
+  sentCount: number
+  createdAt: string
   roles: Array<{
     id: string
     name: string
@@ -169,16 +171,18 @@ export function UserListTable({
           <TableHeader>
             <TableRow>
               <TableHead>{t("username")}</TableHead>
-              <TableHead className="text-right">{t("emailCount")}</TableHead>
-              <TableHead className="text-right">{t("messageCount")}</TableHead>
+              <TableHead className="text-right whitespace-nowrap">{t("emailCount")}</TableHead>
+              <TableHead className="text-right whitespace-nowrap">{t("receivedCount")}</TableHead>
+              <TableHead className="text-right whitespace-nowrap">{t("sentCount")}</TableHead>
               <TableHead>{t("role")}</TableHead>
-              <TableHead className="text-right">{t("actions")}</TableHead>
+              <TableHead>{t("registrationTime")}</TableHead>
+              <TableHead className="text-right sticky right-0 bg-background shadow-[-4px_0_6px_-1px_rgba(0,0,0,0.1)]">{t("actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground">
+                <TableCell colSpan={7} className="text-center text-muted-foreground">
                   {t("noUsers")}
                 </TableCell>
               </TableRow>
@@ -189,7 +193,8 @@ export function UserListTable({
                     {user.username || user.name || user.email || "N/A"}
                   </TableCell>
                   <TableCell className="text-right">{user.emailCount}</TableCell>
-                  <TableCell className="text-right">{user.messageCount}</TableCell>
+                  <TableCell className="text-right">{user.receivedCount}</TableCell>
+                  <TableCell className="text-right">{user.sentCount}</TableCell>
                   <TableCell>
                     {(() => {
                       const isEmperor = user.roles.some(r => r.name === ROLES.EMPEROR)
@@ -205,36 +210,44 @@ export function UserListTable({
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value={ROLES.EMPEROR}>
-                              <div className="flex items-center gap-2">
-                                <Crown className="w-3 h-3" />
-                                {tCard("roles.EMPEROR")}
-                              </div>
-                            </SelectItem>
-                            <SelectItem value={ROLES.DUKE}>
-                              <div className="flex items-center gap-2">
-                                <Gem className="w-3 h-3" />
-                                {tCard("roles.DUKE")}
-                              </div>
-                            </SelectItem>
-                            <SelectItem value={ROLES.KNIGHT}>
-                              <div className="flex items-center gap-2">
-                                <Sword className="w-3 h-3" />
-                                {tCard("roles.KNIGHT")}
-                              </div>
-                            </SelectItem>
-                            <SelectItem value={ROLES.CIVILIAN}>
-                              <div className="flex items-center gap-2">
-                                <User2 className="w-3 h-3" />
-                                {tCard("roles.CIVILIAN")}
-                              </div>
-                            </SelectItem>
+                            {isEmperor ? (
+                              <SelectItem value={ROLES.EMPEROR}>
+                                <div className="flex items-center gap-2">
+                                  <Crown className="w-3 h-3" />
+                                  {tCard("roles.EMPEROR")}
+                                </div>
+                              </SelectItem>
+                            ) : (
+                              <>
+                                <SelectItem value={ROLES.DUKE}>
+                                  <div className="flex items-center gap-2">
+                                    <Gem className="w-3 h-3" />
+                                    {tCard("roles.DUKE")}
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value={ROLES.KNIGHT}>
+                                  <div className="flex items-center gap-2">
+                                    <Sword className="w-3 h-3" />
+                                    {tCard("roles.KNIGHT")}
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value={ROLES.CIVILIAN}>
+                                  <div className="flex items-center gap-2">
+                                    <User2 className="w-3 h-3" />
+                                    {tCard("roles.CIVILIAN")}
+                                  </div>
+                                </SelectItem>
+                              </>
+                            )}
                           </SelectContent>
                         </Select>
                       )
                     })()}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell>
+                    {new Date(user.createdAt).toLocaleString()}
+                  </TableCell>
+                  <TableCell className="text-right sticky right-0 bg-background shadow-[-4px_0_6px_-1px_rgba(0,0,0,0.1)]">
                     <div className="flex items-center justify-end gap-2">
                       <Button
                         variant="ghost"

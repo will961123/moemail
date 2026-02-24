@@ -160,7 +160,7 @@
     "delete": "삭제",
     "cancel": "취소",
     "searchUsername": "사용자 검색",
-    "searchUsernamePlaceholder": "사용자 이름, 이름 또는 이메일 입력",
+    "searchUsernamePlaceholder": "사용자 이름",
     "searchRole": "역할",
     "allRoles": "모든 역할",
     "search": "검색",
