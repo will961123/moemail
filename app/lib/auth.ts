@@ -216,7 +216,7 @@ export const {
           console.log('[Auth] Registration not allowed for provider:', account.provider)
           console.log('[Auth] User ID:', user.id)
 
-          // 不允许注册，检查用户是否是刚创建的
+          // 不允许注册，检查用户是否已经存在
           try {
             console.log('[Auth] Querying user record...')
             const userRecord = await db.query.users.findFirst({
@@ -226,35 +226,18 @@ export const {
             console.log('[Auth] User record found:', !!userRecord)
 
             if (userRecord) {
-              const createdAt = new Date(userRecord.createdAt)
-              const now = new Date()
-              const diffInSeconds = (now.getTime() - createdAt.getTime()) / 1000
-
-              console.log('[Auth] User created at:', createdAt.toISOString())
-              console.log('[Auth] Current time:', now.toISOString())
-              console.log('[Auth] Time difference (seconds):', diffInSeconds)
-
-              // 如果用户是在 30 秒内创建的，说明是新用户，删除记录
-              if (diffInSeconds < 30) {
-                console.log('[Auth] Deleting new user (within 30s)')
-                await db.delete(accounts).where(eq(accounts.userId, user.id))
-                await db.delete(users).where(eq(users.id, user.id))
-                console.log('[Auth] User deleted successfully')
-                return false
-              }
-
-              console.log('[Auth] User is old (>30s), allowing login')
+              // 用户已存在，是老用户，允许登录
+              console.log('[Auth] Existing user, allowing login')
+              return true
             } else {
-              console.log('[Auth] User record not found, blocking login')
+              // 用户不存在，是新用户，拒绝注册
+              console.log('[Auth] New user, blocking registration')
               return false
             }
           } catch (error) {
             console.error('[Auth] Error:', error)
             return false
           }
-
-          // 如果用户不是新创建的，说明是老用户，允许登录
-          return true
         }
 
         return true
