@@ -186,26 +186,40 @@ export function LoginForm({ turnstile }: LoginFormProps) {
         return
       }
 
-      // 注册成功后自动登录
-      const result = await signIn("credentials", {
-        username,
-        password,
-        turnstileToken,
-        redirect: false,
+      // 注册成功,提示用户手动登录
+      toast({
+        title: t("toast.registerSuccess"),
+        description: t("toast.registerSuccessDesc"),
       })
 
-      if (result?.error) {
-        toast({
-          title: t("toast.loginFailed"),
-          description: result.error || t("toast.autoLoginFailed"),
-          variant: "destructive",
-        })
-        setLoading(false)
-        resetTurnstile()
-        return
-      }
+      // 清空表单并切换到登录选项卡
+      clearForm()
+      resetTurnstile()
+      setActiveTab("login")
+      setLoading(false)
 
-      window.location.href = "/"
+      // 注释掉自动登录逻辑,因为 Turnstile token 是一次性的
+      // 注册时已经使用了 token,自动登录时再次使用会失败
+      // // 注册成功后自动登录
+      // const result = await signIn("credentials", {
+      //   username,
+      //   password,
+      //   turnstileToken,
+      //   redirect: false,
+      // })
+
+      // if (result?.error) {
+      //   toast({
+      //     title: t("toast.loginFailed"),
+      //     description: result.error || t("toast.autoLoginFailed"),
+      //     variant: "destructive",
+      //   })
+      //   setLoading(false)
+      //   resetTurnstile()
+      //   return
+      // }
+
+      // window.location.href = "/"
     } catch (error) {
       toast({
         title: t("toast.registerFailed"),
