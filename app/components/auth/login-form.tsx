@@ -58,13 +58,16 @@ export function LoginForm({ turnstile }: LoginFormProps) {
     console.log('[LoginForm] URL error param:', error)
     if (error === 'AccessDenied') {
       console.log('[LoginForm] Showing registration disabled toast')
-      toast({
-        title: t("toast.loginFailed"),
-        description: t("toast.registrationDisabled"),
-        variant: "destructive",
-      })
-      // 清除 URL 参数
+      // 先清除 URL 参数,避免重新渲染取消 toast
       window.history.replaceState({}, '', window.location.pathname)
+      // 然后显示 toast
+      setTimeout(() => {
+        toast({
+          title: t("toast.loginFailed"),
+          description: t("toast.registrationDisabled"),
+          variant: "destructive",
+        })
+      }, 100)
     }
   }, [searchParams, toast, t])
 
