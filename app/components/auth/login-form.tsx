@@ -55,7 +55,9 @@ export function LoginForm({ turnstile }: LoginFormProps) {
   // 检查 URL 参数中的错误信息
   useEffect(() => {
     const error = searchParams.get('error')
+    console.log('[LoginForm] URL error param:', error)
     if (error === 'AccessDenied') {
+      console.log('[LoginForm] Showing registration disabled toast')
       toast({
         title: t("toast.loginFailed"),
         description: t("toast.registrationDisabled"),
