@@ -1,8 +1,9 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useState, useEffect } from "react"
 import { signIn } from "next-auth/react"
 import { useTranslations } from "next-intl"
+import { useSearchParams } from "next/navigation"
 import { useToast } from "@/components/ui/use-toast"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -49,6 +50,21 @@ export function LoginForm({ turnstile }: LoginFormProps) {
   const [activeTab, setActiveTab] = useState<"login" | "register">("login")
   const { toast } = useToast()
   const t = useTranslations("auth.loginForm")
+  const searchParams = useSearchParams()
+
+  // 检查 URL 参数中的错误信息
+  useEffect(() => {
+    const error = searchParams.get('error')
+    if (error === 'AccessDenied') {
+      toast({
+        title: t("toast.loginFailed"),
+        description: t("toast.registrationDisabled"),
+        variant: "destructive",
+      })
+      // 清除 URL 参数
+      window.history.replaceState({}, '', window.location.pathname)
+    }
+  }, [searchParams, toast, t])
 
   const turnstileSiteKey = turnstile?.siteKey ?? ""
   const turnstileEnabled = Boolean(turnstile?.enabled && turnstileSiteKey)

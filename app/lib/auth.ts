@@ -99,6 +99,10 @@ export const {
     usersTable: users,
     accountsTable: accounts,
   }),
+  pages: {
+    signIn: '/login',
+    error: '/login',
+  },
   providers: [
     GitHub({
       clientId: process.env.AUTH_GITHUB_ID,
