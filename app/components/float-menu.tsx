@@ -15,8 +15,8 @@ export function FloatMenu() {
   const t = useTranslations("common")
   const pathname = usePathname()
 
-  // 在分享页面隐藏GitHub悬浮框
-  if (pathname.includes("/shared/")) {
+  // 在设置页面显示GitHub悬浮框
+  if (!pathname.includes("/profile")) {
     return null
   }
 
