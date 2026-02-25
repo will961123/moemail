@@ -192,6 +192,7 @@ export const {
       if (account.provider === "github" || account.provider === "google") {
         // 确保 user.id 存在
         if (!user.id) {
+          console.log('[Auth] User ID is missing, blocking login')
           return false
         }
 
@@ -213,30 +214,43 @@ export const {
 
         if (!isAllowed) {
           console.log('[Auth] Registration not allowed for provider:', account.provider)
+          console.log('[Auth] User ID:', user.id)
 
           // 不允许注册，检查用户是否是刚创建的
-          const userRecord = await db.query.users.findFirst({
-            where: eq(users.id, user.id)
-          })
+          try {
+            console.log('[Auth] Querying user record...')
+            const userRecord = await db.query.users.findFirst({
+              where: eq(users.id, user.id)
+            })
 
-          if (userRecord) {
-            const createdAt = new Date(userRecord.createdAt)
-            const now = new Date()
-            const diffInSeconds = (now.getTime() - createdAt.getTime()) / 1000
+            console.log('[Auth] User record found:', !!userRecord)
 
-            console.log('[Auth] User created at:', createdAt.toISOString())
-            console.log('[Auth] Current time:', now.toISOString())
-            console.log('[Auth] Time difference (seconds):', diffInSeconds)
+            if (userRecord) {
+              const createdAt = new Date(userRecord.createdAt)
+              const now = new Date()
+              const diffInSeconds = (now.getTime() - createdAt.getTime()) / 1000
 
-            // 如果用户是在 30 秒内创建的，说明是新用户，删除记录
-            if (diffInSeconds < 30) {
-              console.log('[Auth] Deleting new user (within 30s)')
-              await db.delete(accounts).where(eq(accounts.userId, user.id))
-              await db.delete(users).where(eq(users.id, user.id))
+              console.log('[Auth] User created at:', createdAt.toISOString())
+              console.log('[Auth] Current time:', now.toISOString())
+              console.log('[Auth] Time difference (seconds):', diffInSeconds)
+
+              // 如果用户是在 30 秒内创建的，说明是新用户，删除记录
+              if (diffInSeconds < 30) {
+                console.log('[Auth] Deleting new user (within 30s)')
+                await db.delete(accounts).where(eq(accounts.userId, user.id))
+                await db.delete(users).where(eq(users.id, user.id))
+                console.log('[Auth] User deleted successfully')
+                return false
+              }
+
+              console.log('[Auth] User is old (>30s), allowing login')
+            } else {
+              console.log('[Auth] User record not found, blocking login')
               return false
             }
-
-            console.log('[Auth] User is old (>30s), allowing login')
+          } catch (error) {
+            console.error('[Auth] Error:', error)
+            return false
           }
 
           // 如果用户不是新创建的，说明是老用户，允许登录
